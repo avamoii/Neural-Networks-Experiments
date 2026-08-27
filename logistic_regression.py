@@ -1,34 +1,47 @@
-import math
-
-def sigmoid(z):
-    return 1 / (1 + math.exp(-z))
-
-def propagate_with_for_loops(w, b, X, Y):
-
-    nx = len(X)       
-    m = len(X[0])     
+import numpy as np
+def sigmiod(z):
+    """
+    Compute the sigmoid activation function.
     
-    J = 0
-    dw = [0] * nx
-    db = 0
+    Arguments:
+    z -- A scalar or numpy array of any size.
     
-    for i in range(m):
-        z = 0
-        for j in range(nx):
-            z += w[j] * X[j][i]
-        z += b
-        
-        a = sigmoid(z)
-        J += -(Y[0][i] * math.log(a) + (1 - Y[0][i]) * math.log(1 - a))
-        
-        dz = a - Y[0][i]
-        for j in range(nx):
-            dw[j] += X[j][i] * dz
-        db += dz
-        
-    J = J / m
-    for j in range(nx):
-        dw[j] = dw[j] / m
-    db = db / m
+    Return:
+    s -- sigmoid(z)
+    """
+    return 1 / (1 + np.exp(-z))
+
+
+def propagate(w, b, X, Y):
+    """
+    Implement the cost function and its gradient for the propagation step.
+    This version is fully vectorized to process all 'm' examples simultaneously.
     
-    return dw, db, J
+    Arguments:
+    w -- weights, a numpy array of size (nx, 1)
+    b -- bias, a scalar
+    X -- input data matrix of size (nx, m)
+    Y -- true "label" vector of size (1, m)
+    
+    Return:
+    grads -- dictionary containing the gradients of the weights and bias
+    cost -- negative log-likelihood cost for logistic regression
+    """
+    m = X.shape[1]
+    
+
+    Z = np.dot(w.T, X) + b
+    A = sigmoid(Z)
+    
+    
+    cost = (-1 / m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
+    
+  
+    dZ = A - Y
+    dw = (1 / m) * np.dot(X, dZ.T)
+    db = (1 / m) * np.sum(dZ)
+    
+    cost = np.squeeze(cost)
+    
+    grads = {"dw": dw, "db": db}
+    return grads, cost
