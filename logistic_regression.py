@@ -44,4 +44,75 @@ def propagate(w,b,X,Y):
     return grads, cost
 
     
+def optimize(w, b, X, Y, num_iterations=100, learning_rate=0.009, print_cost=False):
+    """
+    This function optimizes w and b by running a gradient descent algorithm.
+    
+    Arguments:
+    w -- weights, a numpy array of size (nx, 1)
+    b -- bias, a scalar
+    X -- data of shape (nx, m)
+    Y -- true "label" vector of shape (1, m)
+    num_iterations -- number of iterations of the optimization loop
+    learning_rate -- learning rate of the gradient descent update rule
+    print_cost -- True to print the loss every 100 steps
+    
+    Returns:
+    params -- dictionary containing the weights w and bias b
+    grads -- dictionary containing the gradients of the weights and bias
+    costs -- list of all the costs computed during the optimization
+    """
+    import copy
+    w = copy.deepcopy(w)
+    b = copy.deepcopy(b)
+    
+    costs = []
+    
+    for i in range(num_iterations):
+        # Calculate cost and gradients using the vectorized propagate function
+        grads, cost = propagate(w, b, X, Y)
+        
+        dw = grads["dw"]
+        db = grads["db"]
+        
+        # Update rule for parameters
+        w = w - (learning_rate * dw)
+        b = b - (learning_rate * db)
+        
+        # Record the costs for plotting later
+        if i % 100 == 0:
+            costs.append(cost)
+            if print_cost:
+                print(f"Cost after iteration {i}: {cost}")
+    
+    params = {"w": w, "b": b}
+    grads = {"dw": dw, "db": db}
+    
+    return params, grads, costs
 
+def predict(w, b, X):
+    """
+    Predict whether the label is 0 or 1 using learned logistic regression parameters (w, b).
+    
+    Arguments:
+    w -- weights, a numpy array of size (nx, 1)
+    b -- bias, a scalar
+    X -- data of size (nx, m)
+    
+    Returns:
+    Y_prediction -- a numpy array (vector) containing all predictions (0/1) for the examples in X
+    """
+    m = X.shape[1]
+    Y_prediction = np.zeros((1, m))
+    
+    # Compute vector "A" predicting the probabilities of a cat being present in the picture
+    A = sigmoid(np.dot(w.T, X) + b)
+    
+    # Convert probabilities A[0,i] to actual predictions p[0,i]
+    for i in range(A.shape[1]):
+        if A[0, i] > 0.5:
+            Y_prediction[0, i] = 1
+        else:
+            Y_prediction[0, i] = 0
+            
+    return Y_prediction
