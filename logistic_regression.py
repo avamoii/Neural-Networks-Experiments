@@ -116,3 +116,44 @@ def predict(w, b, X):
             Y_prediction[0, i] = 0
             
     return Y_prediction
+
+def initialize_with_zeros(dim):
+    """
+    This function creates a vector of zeros of shape (dim, 1) for w and initializes b to 0.
+    """
+    w = np.zeros((dim, 1))
+    b = 0.0
+    return w, b
+
+def model(X_train, Y_train, X_test, Y_test, num_iterations=2000, learning_rate=0.5, print_cost=False):
+    """
+    Builds the logistic regression model by calling the function you've implemented previously.
+    """
+    # 1. Initialize parameters
+    w, b = initialize_with_zeros(X_train.shape[0])
+    
+    # 2. Gradient descent
+    params, grads, costs = optimize(w, b, X_train, Y_train, num_iterations, learning_rate, print_cost)
+    
+    # Retrieve parameters w and b from dictionary
+    w = params["w"]
+    b = params["b"]
+    
+    # 3. Predict test/train set examples
+    Y_prediction_test = predict(w, b, X_test)
+    Y_prediction_train = predict(w, b, X_train)
+    
+    
+    if print_cost:
+        print(f"train accuracy: {100 - np.mean(np.abs(Y_prediction_train - Y_train)) * 100} %")
+        print(f"test accuracy: {100 - np.mean(np.abs(Y_prediction_test - Y_test)) * 100} %")
+        
+    d = {"costs": costs,
+         "Y_prediction_test": Y_prediction_test,
+         "Y_prediction_train": Y_prediction_train,
+         "w": w, 
+         "b": b,
+         "learning_rate": learning_rate,
+         "num_iterations": num_iterations}
+    
+    return d
